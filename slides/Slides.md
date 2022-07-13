@@ -3,10 +3,10 @@ marp: true
 paginate: true
 theme: uncover
 class: invert
-font: Fira Sans Regular
 style: |
-  section { font-family: "Fira Sans" }
-  code { font-family: "FiraCode Nerd Font Mono" }
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code&family=Fira+Sans:ital@0;1&display=swap');
+  section { font-family: "Fira Sans", sans-serif; }
+  code { font-family: "Fira Code", monospace; }
 ---
 
 ![bg left:50% 80%](assets/Haskell.svg)
@@ -133,7 +133,7 @@ runParser empty ""    ≡ Nothing
 
 ---
 
-## **eof**
+## **`eof`**
 
 ```haskell
 eof :: Parser ()
@@ -150,7 +150,7 @@ runparser eof "abc" ≡ Nothing
 
 ---
 
-## **anyChar**
+## **`anyChar`**
 
 ```haskell
 anyChar :: Parser Char
@@ -168,7 +168,7 @@ runparesr anyChar "2"   ≡ Just ('2', "")
 
 ---
 
-## **anyChar (Fancy)**
+## **`anyChar` (Fancy)**
 
 ```haskell
 import Data.List
@@ -187,7 +187,7 @@ uncons :: [a] -> Maybe (a, [a])
 
 ---
 
-## **satisfy**
+## **`satisfy`**
 
 ```haskell
 satisfy :: (Char -> Bool) -> Parser Char
@@ -224,7 +224,7 @@ runParser (char 'b') "abc" ≡ Nothing
 
 ---
 
-## **spaces**
+## **Skipping Whitespace**
 
 ```haskell
 spaces :: Parser ()
@@ -271,7 +271,6 @@ class Functor f where
 
 instance Functor Parser where
   fmap :: (a -> b) -> Parser a -> Parser b
-
   fmap f (Parser p) = Parser $ \s ->
     case p s of
       Nothing -> Nothing
@@ -290,13 +289,12 @@ instance Functor Parser where
 -- Shorthands for fmap with constant function
 (<$)  :: Functor f => b -> f a -> f b
 ($>)  :: Functor f => f a -> b -> f b
-void :: Functor f => f a -> F ()
+void  :: Functor f => f a -> f ()
 ```
 
 ```haskell
 f <$> p ≡ fmap f p
 p <&> f ≡ fmap f p
-
 x <$ p  ≡ fmap (\_ -> x) p
 p $> x  ≡ fmap (\_ -> x) p
 void p  ≡ fmap (\_ -> ()) p
@@ -698,7 +696,7 @@ json =
 
 * Cyclical definitions
   ```haskell
-  jArray = ... json `sepBy` str "," ...
+  jArray = ... json `sepEndBy` str "," ...
   --           ^^^^
   json = ... <|> jArray <|> ...
   --             ^^^^^^
