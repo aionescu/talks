@@ -5,8 +5,8 @@ import JSON(parseJSON)
 test :: String -> IO ()
 test s =
   case parseJSON s of
-    Nothing -> putStrLn $ "ERROR: " <> show s
-    Just json -> print json
+    Nothing -> putStrLn $ "❌ " <> s
+    Just json -> putStrLn $ "✔️  " <> show json
 
 main :: IO ()
 main = do

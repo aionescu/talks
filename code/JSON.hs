@@ -3,7 +3,8 @@ module JSON(parseJSON) where
 import Control.Applicative(Applicative(..), Alternative(..))
 import Data.Containers.ListUtils(nubOrd)
 import Data.Functor(($>), void)
-import Data.Map(Map, fromList)
+import Data.List(intercalate)
+import Data.Map(Map, fromList, toList)
 import Parser
 
 data JSON
@@ -13,7 +14,17 @@ data JSON
   | JString String
   | JArray [JSON]
   | JObject (Map String JSON)
-  deriving Show
+
+instance Show JSON where
+  show JNull = "null"
+  show (JBool True) = "true"
+  show (JBool False) = "false"
+  show (JNumber n) = show n
+  show (JString s) = show s
+  show (JArray js) = "[" <> intercalate ", " (show <$> js) <> "]"
+  show (JObject fs) = "{" <> intercalate ", " (showField <$> toList fs) <> "}"
+    where
+      showField (f, j) = show f <> ": " <> show j
 
 singleLine, multiLine, comment :: Parser ()
 singleLine = string "//" *> skipManyTill (endOfLine <|> eof)
