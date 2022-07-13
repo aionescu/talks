@@ -630,7 +630,7 @@ code { font-family: &quot;Fira Code&quot;, monospace; }
 <span class="hljs-title">comment</span> = singleLine &lt;|&gt; multiLine
 
 <span class="hljs-title">ws</span> :: <span class="hljs-type">Parser</span> ()
-<span class="hljs-title">ws</span> = comment `sepEndBy` spaces $&gt; ()
+<span class="hljs-title">ws</span> = void $ spaces `sepEndBy` comment
 
 <span class="hljs-title">str</span> :: <span class="hljs-type">Parser</span> <span class="hljs-type">String</span>
 <span class="hljs-title">str</span> s = string s &lt;* ws
@@ -730,7 +730,7 @@ code { font-family: &quot;Fira Code&quot;, monospace; }
   jString &lt;|&gt; jArray &lt;|&gt; jObject
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="46" data-marpit-fragments="5" data-paginate="true" data-class="invert" data-theme="uncover" data-style="@import url('https://fonts.googleapis.com/css2?family=Fira+Code&amp;family=Fira+Sans:ital@0;1&amp;display=swap');
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="46" data-marpit-fragments="4" data-paginate="true" data-class="invert" data-theme="uncover" data-style="@import url('https://fonts.googleapis.com/css2?family=Fira+Code&amp;family=Fira+Sans:ital@0;1&amp;display=swap');
 section { font-family: &quot;Fira Sans&quot;, sans-serif; }
 code { font-family: &quot;Fira Code&quot;, monospace; }
 " class="invert" data-marpit-pagination="46" data-marpit-pagination-total="52" style="--paginate:true;--class:invert;--theme:uncover;--style:@import url('https://fonts.googleapis.com/css2?family=Fira+Code&amp;family=Fira+Sans:ital@0;1&amp;display=swap')
@@ -745,9 +745,8 @@ code { font-family: &quot;Fira Code&quot;, monospace; }
 </li>
 <li data-marpit-fragment="2">That's fine! (Thanks laziness!)
 <ul>
-<li data-marpit-fragment="3">Tough to do in strict languages</li>
-<li data-marpit-fragment="4">Simulated with mutability or fixpoints</li>
-<li data-marpit-fragment="5"><em>Especially</em> tough in Elm</li>
+<li data-marpit-fragment="3">Tricky to do in strict languages</li>
+<li data-marpit-fragment="4">Simulated with mutability or explicit laziness</li>
 </ul>
 </li>
 </ul>

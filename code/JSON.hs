@@ -2,7 +2,7 @@ module JSON(parseJSON) where
 
 import Control.Applicative(Applicative(..), Alternative(..))
 import Data.Containers.ListUtils(nubOrd)
-import Data.Functor(($>))
+import Data.Functor(($>), void)
 import Data.Map(Map, fromList)
 import Parser
 
@@ -21,7 +21,7 @@ multiLine = string "/*" *> skipManyTill (string "*/")
 comment = singleLine <|> multiLine
 
 ws :: Parser ()
-ws = spaces <* comment `sepEndBy` spaces $> ()
+ws = void $ spaces `sepEndBy` comment
 
 str :: String -> Parser String
 str s = string s <* ws

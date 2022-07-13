@@ -612,7 +612,7 @@ multiLine = string "/*" *> skipManyTill (string "*/")
 comment = singleLine <|> multiLine
 
 ws :: Parser ()
-ws = comment `sepEndBy` spaces $> ()
+ws = void $ spaces `sepEndBy` comment
 
 str :: Parser String
 str s = string s <* ws
@@ -718,9 +718,8 @@ json =
   --             ^^^^^^
   ```
 * That's fine! (Thanks laziness!)
-  * Tough to do in strict languages
-  * Simulated with mutability or fixpoints
-  * *Especially* tough in Elm
+  * Tricky to do in strict languages
+  * Simulated with mutability or explicit laziness
 
 ---
 

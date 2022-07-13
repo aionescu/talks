@@ -19,13 +19,7 @@ eof = Parser $ \s ->
     _ : _ -> Nothing
 
 anyChar :: Parser Char
-anyChar = Parser $ \s ->
-  case s of
-    [] -> Nothing
-    c : rest -> Just (c, rest)
-
-anyChar' :: Parser Char
-anyChar' = Parser uncons
+anyChar = Parser uncons
 
 satisfy :: (Char -> Bool) -> Parser Char
 satisfy p = Parser $ \s ->
