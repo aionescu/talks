@@ -224,6 +224,22 @@ runParser (char 'b') "abc" ≡ Nothing
 
 ---
 
+## **`string`**
+
+```haskell
+string :: String -> Parser String
+string a = Parser $ \s ->
+  if a `isPrefixOf` s
+  then Just (a, drop (length a) s)
+  else Nothing
+```
+
+```haskell
+runParser (string "let") "letter" ≡ Just ("let", "ter")
+```
+
+---
+
 ## **Skipping Whitespace**
 
 ```haskell
