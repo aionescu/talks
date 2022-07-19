@@ -89,7 +89,7 @@ sepBy :: Parser a -> Parser sep -> Parser [a]
 sepBy a sep = ((:) <$> a <*> many (sep *> a)) <|> pure []
 
 sepEndBy :: Parser a -> Parser sep -> Parser [a]
-sepEndBy a sep = ((:) <$> a <*> many (sep *> a) <* optional sep) <|> pure []
+sepEndBy a sep = (<>) <$> many (a <* sep) <*> (pure <$> a <|> pure [])
 
 skipManyTill :: Parser a -> Parser ()
 skipManyTill p = Parser $ \s ->
