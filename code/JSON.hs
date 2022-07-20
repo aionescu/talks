@@ -4,7 +4,8 @@ import Control.Applicative(Applicative(..), Alternative(..))
 import Data.Containers.ListUtils(nubOrd)
 import Data.Functor(($>), void)
 import Data.List(intercalate)
-import Data.Map(Map, fromList, toList)
+import Data.Map(Map)
+import qualified Data.Map as Map
 import Parser
 
 data JSON
@@ -22,7 +23,7 @@ instance Show JSON where
   show (JNumber n) = show n
   show (JString s) = show s
   show (JArray js) = "[" <> intercalate ", " (show <$> js) <> "]"
-  show (JObject fs) = "{" <> intercalate ", " (showField <$> toList fs) <> "}"
+  show (JObject fs) = "{" <> intercalate ", " (showField <$> Map.toList fs) <> "}"
     where
       showField (f, j) = show f <> ": " <> show j
 
@@ -65,10 +66,10 @@ fields =
 
 checkUnique :: [(String, JSON)] -> Parser JSON
 checkUnique fields =
-  let names = fst <$> fields
+  let map = Map.fromList fields
   in
-    if length names == length (nubOrd names)
-    then pure $ JObject $ fromList fields
+    if Map.size map == length fields
+    then pure $ JObject map
     else empty
 
 jObject :: Parser JSON

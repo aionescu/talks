@@ -21,27 +21,40 @@ Alex Ionescu
 
 ---
 
-## **Agenda**
+## **Parsing 101**
 
-* We'll implement a JSON parser
-  * Comments, trailing commas, whitespace
-* In Haskell
-* We'll use *parser combinators*
+Parsing ≈ Deriving structured data out of text
+
+* Traditionally done using bespoke tools (e.g. `lex`, `yacc`)
+* Alternative: *Parser Combinators*
+  - More flexible, easier to learn
+  - Library, not separate language
 
 ---
 
-## **What *is* a parser?**
+### **Parser Combinators**
 
-- C#
+
+![bg right:40% 50%](assets/Lego.png)
+
+* *Core idea*: Create complex parsers by combining simple ones.
+* Functional in nature
+  - Composition-based
+  - Immutable
+  * Haskell is a great choice!
+
+---
+
+### **How should we represent parsers?**
+
+* Example: `int` parser
   ```csharp
+  // C#
   int Int32.Parse(string s)
-  ```
-- C++
-  ```c++
+  // C/C++
   int atoi(const char* s)
   ```
-
-* Haskell
+* Obvious solution: Functions!
   ```haskell
   type Parser a = String -> a
   ```
@@ -50,19 +63,16 @@ Alex Ionescu
 
 ## **What About Failure?**
 
-* C# uses exceptions
+* Exceptions?
   ```csharp
-  int.Parse("123") // 123
-  int.Parse("abc") // 💥 Exception
+  int.Parse("123") // ✅ 123
+  int.Parse("abc") // 💥 FormatException
   ```
-* C++ just wants to watch the world burn
-  ```c++
-  atoi("123") // 123
-  atoi("0") // 0
-  atoi("abc") // ⚠️ also 0
-  ```
-* `Maybe` to the rescue!
+* Exceptions "lie" about the function's type
+* Solution: Algebraic Data Types
   ```haskell
+  data Maybe a = Nothing | Just a
+
   type Parser a = String -> Maybe a
   ```
 
@@ -74,6 +84,7 @@ If we're trying to parse an `int` out of `"123abc"`, what's the result?
 
 * Failure: The *entirety of the input* does not represent an `int`.
 * Success: Parse as much as you can, and return the "leftover" alongside the result.
+* Less greedy parsers are more easily composed.
 
 ---
 
@@ -82,6 +93,8 @@ If we're trying to parse an `int` out of `"123abc"`, what's the result?
 ```haskell
 type Parser a = String -> Maybe (a, String)
 ```
+
+* Small problem, it's a *type synonym*
 
 ---
 
@@ -92,16 +105,12 @@ newtype Parser a =
   Parser { runParser :: String -> Maybe (a, String) }
 ```
 
----
-
-## **Types of Parsers**
-
-- "Primitive" parsers
-- Combinators
+* Easier to define `instance`s for it
+* `newtype` means zero overhead
 
 ---
 
-# **Primitives**
+# **"Primitive" Parsers**
 
 ---
 
@@ -168,14 +177,7 @@ runparesr anyChar "2"   ≡ Just ('2', "")
 
 ---
 
-## **`anyChar` (Fancy)**
-
-```haskell
-import Data.List
-
-anyChar :: Parser Char
-anyChar = Parser uncons
-```
+## **Let's not reinvent the wheel**
 
 ```haskell
 -- `String`s are just lists of `Char`s
@@ -183,6 +185,13 @@ type String = [Char]
 
 -- `uncons` splits a list into its head and tail
 uncons :: [a] -> Maybe (a, [a])
+```
+
+```haskell
+import Data.List
+
+anyChar :: Parser Char
+anyChar = Parser uncons
 ```
 
 ---
@@ -258,7 +267,7 @@ runParser spaces "abc"    ≡ Just ((), "abc")
 
 ---
 
-## **Transform ("map") the result of a parser**
+## **Transform the result of a parser**
 
 ```haskell
 fmap :: (a -> b) -> Parser a -> Parser b
@@ -269,8 +278,8 @@ fmap f (Parser p) = Parser $ \s ->
 ```
 
 ```haskell
-runParser (fmap succ letter) "abc"  ≡ Just ('b', "bc")
-runParser (fmap succ letter) "1abc" ≡ Nothing
+runParser (fmap toUpper letter) "abc"  ≡ Just ('A', "bc")
+runParser (fmap toUpper letter) "1abc" ≡ Nothing
 ```
 
 ---
@@ -338,7 +347,7 @@ runParser (liftA2 (,) letter letter) "a1c" ≡ Nothing
 
 ---
 
-## **`liftA2` (Fancy)**
+## **We can `do` better**
 
 ```haskell
 liftA2 :: (a -> b -> c) -> Parser a -> Parser b -> Parser c
@@ -442,18 +451,19 @@ instance Applicative Parser where
 
 ---
 
-## **`(<|>)` (Fancy)**
+## **Piggybacking off of `Maybe`**
+
+```haskell
+(<|>) :: Alternative f => f a -> f a -> f a
+
+instance Alternative Maybe where
+  ...
+```
 
 ```haskell
 Parser pa <|> Parser pb = Parser $ \s -> pa s <|> pb s
 --        ^^^                                 ^^^
 --        on `Parser`s                        on `Maybe`s
-```
-
-```haskell
-(<|>) :: Alternative f => f a -> f a -> f a
-
-instance Alternative Maybe {- ... -}
 ```
 
 ---
@@ -548,7 +558,6 @@ nTimes n p = many p >>= \l ->
   if length l == n
   then pure l
   else empty
-
 p = number >>= \n -> nTimes n letter
 
 runParser p "2ab" ≡ Just ("ab", "")
@@ -582,8 +591,6 @@ instance Monad Parser where
 ## **Data Representation**
 
 ```haskell
-import Data.Map
-
 data JSON
   = JNull
   | JBool Bool
@@ -597,8 +604,8 @@ data JSON
 
 ## **Whitespace? Comments?**
 
-* Need consistency
-* Need modularity
+* Consistent
+* Modular
 * Solution: Each subparser consumes *subsequent* whitespace & comments
 
 ---
@@ -614,7 +621,7 @@ comment = singleLine <|> multiLine
 ws :: Parser ()
 ws = void $ spaces `sepEndBy` comment
 
-str :: Parser String
+str :: String -> Parser String
 str s = string s <* ws
 ```
 
@@ -685,10 +692,10 @@ fields =
 
 checkUnique :: [(String, JSON)] -> Parser JSON
 checkUnique fields =
-  let names = fst <$> fields
+  let map = Map.fromList fields
   in
-    if length names == length (nub names)
-    then pure $ JObject $ fromList fields
+    if Map.size map == length fields
+    then pure $ JObject map
     else empty
 
 jObject :: Parser JSON
@@ -718,8 +725,8 @@ json =
   --             ^^^^^^
   ```
 * That's fine! (Thanks laziness!)
-  * Tricky to do in strict languages
-  * Simulated with mutability or explicit laziness
+  - Tricky to do in strict languages
+  - Simulated with mutability or explicit laziness
 
 ---
 
@@ -742,29 +749,34 @@ parseJSON s = fst <$> runParser jsonDoc s
 
 ---
 
-### **Addendum I: What I *didn't* talk about**
+## **Addendum**
 
-* Performance, Backtracking & `try`
+---
+
+## **What I *didn't* talk about**
+
 * Error messages
-* Non-text input (binary, base64 etc.)
-* Expression parsers (`chainl`, `chainr`)
-* `Applicative`-only parsers
-* Non-deterministic parsing
+* Performance & Backtracking (`try`)
+* Other stream types (e.g. `Text`, binary streams)
+* Expression parsers (`chainl`/`chainr`, operator precedence)
+* Combining `Parser` with other monads (`ParserT`)
+  - `State`: Context-sensitive languages
+  - `Reader`: Config (e.g. localization)
 
 ---
 
-### **Addendum II: What libraries to use**
+## **What libraries to use**
 
-* Haskell: [`parsec`](https://hackage.haskell.org/package/parsec), [`megaparsec`](https://hackage.haskell.org/package/megaparsec), [`attoparsec`](https://hackage.haskell.org/package/attoparsec)
-* OCaml: [`angstrom`](https://opam.ocaml.org/packages/angstrom/)
-* F#: [`FParsec`](https://www.nuget.org/packages/FParsec)
-* C#: [`Pidgin`](https://www.nuget.org/packages/Pidgin/)
-* Others: Search `$lang parser combinators`
-* Please don't use *this* code in prod
+- Haskell: [`parsec`](https://hackage.haskell.org/package/parsec), [`megaparsec`](https://hackage.haskell.org/package/megaparsec), [`attoparsec`](https://hackage.haskell.org/package/attoparsec)
+- OCaml: [`angstrom`](https://opam.ocaml.org/packages/angstrom/)
+- F#: [`FParsec`](https://www.nuget.org/packages/FParsec)
+- C#: [`Pidgin`](https://www.nuget.org/packages/Pidgin/)
+- Others: Search `$lang parser combinators`
+- Please don't use *this* code in prod
 
 ---
 
-### **Addendum III: `Parser` (Fancy)**
+## **Work Smart, not Hard**
 
 ```haskell
 {-# LANGUAGE DerivingVia #-}
@@ -775,8 +787,8 @@ newtype StateT s m a =
 
 newtype Parser a =
   Parser { runParser :: String -> Maybe (a, String) }
-  deriving (Functor, Applicative, Alternative, Monad)
-    via (StateT String Maybe)
+    deriving (Functor, Applicative, Alternative, Monad)
+    via StateT String Maybe
 ```
 
 ---
