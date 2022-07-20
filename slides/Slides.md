@@ -34,7 +34,6 @@ Parsing ≈ Deriving structured data out of text
 
 ### **Parser Combinators**
 
-
 ![bg right:40% 50%](assets/Lego.png)
 
 * *Core idea*: Create complex parsers by combining simple ones.
@@ -438,7 +437,7 @@ class Applicative f => Alternative f where
 ```
 
 ```haskell
-instance Applicative Parser where
+instance Alternative Parser where
   empty :: Parser a
   empty = Parser $ \s -> Nothing
 
