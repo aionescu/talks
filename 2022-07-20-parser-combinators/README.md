@@ -4,7 +4,7 @@ In this talk, we'll learn about parser combinators by implementing a small libra
 
 ## Slides
 
-You can find the rendered slides [here](https://aionescu.github.io/talks/2022-07-20-parser-combinators/slides/Slides), and the Markdown source for the slides are in the [slides](slides) directory.
+You can view the rendered slides [here](https://aionescu.github.io/talks/2022-07-20-parser-combinators/slides/Slides), and the Markdown sources and other assets are in the [slides](slides) directory.
 
 ## Code
 
