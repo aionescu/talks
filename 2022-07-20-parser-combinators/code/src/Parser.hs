@@ -3,7 +3,7 @@
 
 module Parser where
 
-import Control.Monad.State(StateT(..))
+import Control.Monad.Trans.State(StateT(..))
 import Control.Applicative(Applicative(..), Alternative(..))
 import Control.Monad(void)
 import Data.Char(isSpace, isLetter, isDigit)
