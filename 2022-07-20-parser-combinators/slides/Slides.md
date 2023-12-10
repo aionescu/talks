@@ -9,6 +9,12 @@ style: |
   code { font-family: "Fira Code", monospace; }
 ---
 
+<!-- markdownlint-disable first-line-heading   -->
+<!-- markdownlint-disable blanks-around-fences -->
+<!-- markdownlint-disable ul-style             -->
+<!-- markdownlint-disable no-alt-text          -->
+<!-- markdownlint-disable no-space-in-links    -->
+
 ![bg left:50% 80%](assets/Haskell.svg)
 
 ## **Parser Combinators from Scratch**
@@ -542,7 +548,7 @@ runParser (between digit digit letter) "1a2"
 
 ---
 
-## **Creating dynamic parsers (`>>=`)**
+## **Create new parsers on-the-fly**
 
 ```haskell
 (>>=) :: Parser a -> (a -> Parser b) -> Parser b
@@ -794,5 +800,5 @@ newtype Parser a =
 
 ## **Thanks for your attention!**
 
-Slides & code available at
-[![](assets/GitHub.png) aionescu/parser-combinators-from-scratch](https://github.com/aionescu/parser-combinators-from-scratch)
+Slides & code are available at
+[![](assets/GitHub.png) aionescu/talks](https://github.com/aionescu/talks)

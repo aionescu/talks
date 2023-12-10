@@ -1,9 +1,0 @@
-{
-  "markdownlint.config": {
-    "first-line-heading": false,
-    "blanks-around-fences": false,
-    "ul-style": false,
-    "no-alt-text": false,
-    "no-space-in-links": false
-  }
-}
