@@ -1720,7 +1720,7 @@ code { font-family: &quot;Fira Code&quot;, monospace; }
 <span class="hljs-keyword">class</span> <span class="hljs-type">NoMain</span>
 
 
-<span class="hljs-keyword">instance</span> <span class="hljs-type">TypeError</span> (<span class="hljs-type">Text</span> &quot;...&quot;) =&gt; <span class="hljs-type">NoMain</span> <span class="hljs-keyword">where</span></span>
+<span class="hljs-keyword">instance</span> <span class="hljs-type">Unsatisfiable</span> (<span class="hljs-type">Text</span> &quot;...&quot;) =&gt; <span class="hljs-type">NoMain</span> <span class="hljs-keyword">where</span></span>
 
 
 <span class="hljs-class"><span class="hljs-keyword">data</span> <span class="hljs-type">Mod</span> (<span class="hljs-title">before</span> :: <span class="hljs-type">Constraint</span>) (<span class="hljs-title">after</span> :: <span class="hljs-type">Constraint</span>) where</span>
@@ -1738,7 +1738,7 @@ code { font-family: &quot;Fira Code&quot;, monospace; }
 <span class="hljs-keyword">class</span> <span class="hljs-type">NoMain</span> <span class="hljs-keyword">where</span></span>
   dummy :: ()
 <span class="hljs-class">
-<span class="hljs-keyword">instance</span> <span class="hljs-type">TypeError</span> (<span class="hljs-type">Text</span> &quot;...&quot;) =&gt; <span class="hljs-type">NoMain</span> <span class="hljs-keyword">where</span></span>
+<span class="hljs-keyword">instance</span> <span class="hljs-type">Unsatisfiable</span> (<span class="hljs-type">Text</span> &quot;...&quot;) =&gt; <span class="hljs-type">NoMain</span> <span class="hljs-keyword">where</span></span>
   dummy = ()
 
 <span class="hljs-class"><span class="hljs-keyword">data</span> <span class="hljs-type">Mod</span> (<span class="hljs-title">before</span> :: <span class="hljs-type">Constraint</span>) (<span class="hljs-title">after</span> :: <span class="hljs-type">Constraint</span>) where</span>

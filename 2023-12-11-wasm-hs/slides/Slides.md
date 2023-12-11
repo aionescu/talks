@@ -1498,7 +1498,7 @@ data Mod (before :: Constraint) (after :: Constraint) where
 class NoMain
 
 
-instance TypeError (Text "...") => NoMain where
+instance Unsatisfiable (Text "...") => NoMain where
 
 
 data Mod (before :: Constraint) (after :: Constraint) where
@@ -1514,7 +1514,7 @@ data Mod (before :: Constraint) (after :: Constraint) where
 class NoMain where
   dummy :: ()
 
-instance TypeError (Text "...") => NoMain where
+instance Unsatisfiable (Text "...") => NoMain where
   dummy = ()
 
 data Mod (before :: Constraint) (after :: Constraint) where
