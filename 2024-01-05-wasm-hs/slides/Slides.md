@@ -109,7 +109,7 @@ style: |
   * ≈ Library pretending to be a language
 * Goals
   - Write and run Wasm programs directly within Haskell
-  * Preserve Wasm's focus on safety
+  * In a type-safe way
   * Look as much as possible like native Wasm
   * ~~Comply 100% with the Wasm specification~~
 
@@ -150,21 +150,19 @@ style: |
 
 ### **DSL Deep-Dive**
 
-* How to represent WASM programs
+* How to represent Wasm programs
   * Abstract syntax tree
   * Type-safety, scoping
-* How to run them
-  * Interpreter
-* How to write them
-  * Overloading Haskell syntax
+* How to interpret Wasm
+* Overloading Haskell syntax
 * Lots of interesting tricks along the way
 
 ---
 
-### **How to represent WASM?**
+### **How to represent Wasm?**
 
 * Let's start small
-  - What's the smallest unit of Wasm syntax?
+  - The smallest unit of Wasm syntax
   * The _Instruction_
 * Representing instructions
   * They operate on stacks of values
@@ -175,7 +173,7 @@ style: |
 
 ### **Representing instructions**
 
-To represent them in Haskell, we can use a GADT:
+We can use a GADT:
 
 ```haskell
 {-# LANGUAGE GADTs #-}
@@ -192,7 +190,7 @@ data Instr (i :: Stack) (o :: Stack) where
 
 ### **Representing instructions**
 
-To represent them in Haskell, we can use a GADT:
+We can use a GADT:
 
 ```haskell
 {-# LANGUAGE GADTs #-}
@@ -209,7 +207,7 @@ data Instr (i :: Stack) (o :: Stack) where
 
 ### **Representing instructions**
 
-To represent them in Haskell, we can use a GADT:
+We can use a GADT:
 
 ```haskell
 {-# LANGUAGE GADTs #-}
@@ -226,7 +224,7 @@ data Instr (i :: Stack) (o :: Stack) where
 
 ### **Representing instructions**
 
-To represent them in Haskell, we can use a GADT:
+We can use a GADT:
 
 ```haskell
 {-# LANGUAGE GADTs #-}
@@ -349,7 +347,7 @@ eval (Seq a b) i = do
 
 ---
 
-### **How to write Wasm?**
+### **Ergonomics**
 
 * We can construct programs directly with the AST
 * But that's pretty ugly
@@ -424,16 +422,17 @@ program = do
   * `HList`s for interpretation
   * `RebindableSyntax` for ergonomics
 * We can now define and run (simple) programs!
+* Let's explore some more complex features
 
 ---
 
 ### **Variables in Wasm**
 
-* In WASM, variables are defined up-front
+* In Wasm, variables are defined up-front
   * Need initial values
-  * Can lead to scope-safety issues
-* `wasm-hs` instead implements scoped variables
-  * Introduced by the `let` instruction
+  * Can lead to "scope confusion"
+* `wasm-hs` instead implements lexical scoping
+  * `let` instruction to introduce variables
   * Delimits a scope, like `block`
 
 ---
@@ -506,7 +505,7 @@ data Instr (env :: [(Symbol, Type)]) (i :: Stack) (o :: Stack) where
 ### **Just delegate to Haskell**
 
 * We're already inside a language with variables
-* Let's just implement WASM variables as _Haskell variables_
+* Let's just implement Wasm variables as _Haskell variables_
 * Well-known technique: Higher-Order Abstract Syntax (HOAS)
 
 ---
@@ -630,7 +629,7 @@ eval (LocalGet @v) i = do
 
 GHC desugars typeclasses into "dictionary-passing":
 
-* `class`es become records of functions (≈ vtables)
+* `class`es become records of functions ("dictionaries")
 * `instance`s become _values_ of these record types
 * Constraints become regular function parameters
   - `=>` becomes `->`
@@ -730,7 +729,7 @@ GHC desugars typeclasses into "dictionary-passing":
 
 ---
 
-### **Let's use `withDict` in `eval`**
+### **Using `withDict` in `eval`**
 
 ```haskell
 class Var v a where
@@ -749,7 +748,7 @@ eval (LocalGet @v) i = do
 
 ---
 
-### **Let's use `withDict` in `eval`**
+### **Using `withDict` in `eval`**
 
 ```haskell
 class Var v a where
@@ -768,7 +767,7 @@ eval (LocalGet @v) i = do
 
 ---
 
-### **Let's use `withDict` in `eval`**
+### **Using `withDict` in `eval`**
 
 ```haskell
 class Var v a | v -> a where
@@ -886,15 +885,6 @@ local =
   , set = LocalSet
   }
 ```
-
----
-
-### **Let's recap: Variables**
-
-* `wasm-hs` implements _scoped_ variables
-* We used HOAS to represent scopes _safely_ and _efficiently_
-* We used _local instances_ and `OverloadedLabels` for ergonomics
-* Questions?
 
 ---
 
@@ -1061,15 +1051,6 @@ eval :: Instr i o -> HList i -> Cont o -> IO ()
 eval (Block @l e) i k = withDict @(Label l _) k $ eval e i k
 eval (Br @l) i k = labelCont @l i
 ```
-
----
-
-### **Let's recap: Control-flow**
-
-* `block` is similar to `let`
-  - Re-use "local instances" machinery
-* Efficiently interpret jumps by using continuations
-* Questions?
 
 ---
 
